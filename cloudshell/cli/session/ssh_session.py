@@ -1,4 +1,4 @@
-import traceback
+# import traceback
 import paramiko
 import inject
 from cloudshell.cli.session.expect_session import ExpectSession
@@ -38,7 +38,7 @@ class SSHSession(ExpectSession):
             self._handler.connect(self._host, self._port, self._username, self._password, timeout=self._timeout,
                                   banner_timeout=30, allow_agent=False, look_for_keys=False)
         except Exception as e:
-            logger.error(traceback.format_exc())
+            # logger.error(traceback.format_exc())
             raise Exception('SSHSession', 'Failed to open connection to device: {0}'.format(e.message))
 
         self._current_channel = self._handler.invoke_shell()
