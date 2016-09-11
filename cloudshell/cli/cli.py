@@ -1,10 +1,10 @@
 from cloudshell.cli.session.session_creator import SessionCreator
-
+from cloudshell.cli.session.session_proxy import ReturnToPoolProxy
 
 
 class Cli(object):
 
-    def __init__(self,user,password,ip,port,mode='default'):
+    def __init__(self):
         self.sessions_map = {'ssh':'SSHSession','telnet':'TelnetSession','tcp':'TCPSession'}
 
     def __enter__(self):
@@ -15,25 +15,30 @@ class Cli(object):
         pass
 
 
-    def ssh_session(self):
-        pass
-
     def get_session_type(self,argument):
-        switcher = {
-
+        session_types = {
             'ssh': __import__('cloudshell.cli.session.ssh_session', fromlist=[self.sessions_map['ssh']]),
             'telnet': __import__('cloudshell.cli.session.ssh_session',fromlist=[self.sessions_map['telnet']]),
             'tcp':__import__('cloudshell.cli.session.ssh_session',fromlist=[self.sessions_map['tcp']]),
         }
-        # Get the function from switcher dictionary
-        func = switcher.get(argument, lambda: "nothing")
-        # Execute the function
+        func = session_types.get(argument, lambda: "nothing")
         if(argument in self.sessions_map):
             return getattr(func, self.sessions_map.get(argument))
         else:
             return None
 
 
-c=Cli('admin','admin','111',80)
+    def new_session(self,session_type,ip,port,user='',password=''):
+        session_class = self.get_session_type(session_type)
+        session = SessionCreator(session_class)
+        session.proxy = ReturnToPoolProxy
+        session.kwargs = {'host': ip,
+                        'port': port}
+        if(user!='' and password!=''):
+            session.kwargs.update({'username': user,
+                              'password': password})
+
+
+c=Cli()
 
 print c.get_session_type('ssh')
