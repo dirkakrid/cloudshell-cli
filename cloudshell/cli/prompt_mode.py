@@ -11,3 +11,5 @@ class Prompt_Mode(Prompt):
         :param actions_tuple: (action,prompt)
         :return:
         '''
+
+

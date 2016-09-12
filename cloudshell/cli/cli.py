@@ -1,8 +1,10 @@
 from cloudshell.cli.session.session_creator import SessionCreator
 from cloudshell.cli.session.session_proxy import ReturnToPoolProxy
 from collections import OrderedDict
+from cloudshell.cli.prompt_mode import Prompt_Mode
 
-class Cli(object):
+
+class Cli(Prompt_Mode):
 
     def __init__(self):
         self.sessions_map = {'ssh':'SSHSession','telnet':'TelnetSession','tcp':'TCPSession'}
