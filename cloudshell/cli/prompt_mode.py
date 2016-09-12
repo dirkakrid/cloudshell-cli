@@ -1,6 +1,6 @@
 from cloudshell.cli.prompt import Prompt
 
-class Prompt_Mode(Prompt):
+class Mode(Prompt):
 
     def __init__(self):
         self.default_actions = list()
@@ -12,4 +12,10 @@ class Prompt_Mode(Prompt):
         :return:
         '''
 
+
+    def enter_mode(self):
+        pass
+
+    def exit_mode(self):
+        pass
 

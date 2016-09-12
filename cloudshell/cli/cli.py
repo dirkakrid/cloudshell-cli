@@ -1,13 +1,13 @@
 from cloudshell.cli.session.session_creator import SessionCreator
 from cloudshell.cli.session.session_proxy import ReturnToPoolProxy
 from collections import OrderedDict
-from cloudshell.cli.prompt_mode import Prompt_Mode
+from cloudshell.cli.prompt_mode import Mode
 
 
-class Cli(Prompt_Mode):
+class Cli(Mode):
 
     def __init__(self):
-        self.sessions_map = {'ssh':'SSHSession','telnet':'TelnetSession','tcp':'TCPSession'}
+        self.sessions_map = {'ssh':'SSHSession','telnet':'TelnetSession','tcp':'TCPSession','auto':'auto'}
         self.session = None
         self.CONNECTION_MAP = OrderedDict()
 
@@ -23,11 +23,10 @@ class Cli(Prompt_Mode):
         session_types = {
             'ssh': __import__('cloudshell.cli.session.ssh_session', fromlist=[self.sessions_map['ssh']]),
             'telnet': __import__('cloudshell.cli.session.ssh_session',fromlist=[self.sessions_map['telnet']]),
-            'tcp':__import__('cloudshell.cli.session.ssh_session',fromlist=[self.sessions_map['tcp']]),
+            'tcp':__import__('cloudshell.cli.session.ssh_session',fromlist=[self.sessions_map['tcp']])
         }
         func = session_types.get(argument, lambda: "auto")
         if(argument in self.sessions_map):
-
             return getattr(func, self.sessions_map.get(argument))
         else:
             return None
