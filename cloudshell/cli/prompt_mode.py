@@ -9,9 +9,9 @@ class Mode(Prompt):
         self.mode = 'default'
 
 
-    def set_default_actions(self,actions_tuple):
+    def set_default_actions(self,actions_tuple_list):
         '''
-        :param actions_tuple: (action,prompt)
+        :param actions_tuple_list: [(action,prompt)]
         :return:
         '''
 
