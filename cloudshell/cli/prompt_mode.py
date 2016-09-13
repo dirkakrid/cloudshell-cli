@@ -21,7 +21,7 @@ class Mode(Prompt):
                 actions = [actions]
         self.initiate_actions = Actions(actions)
 
-    def enter_mode(self,):pass
+    def enter_mode(self,mode_tuple):pass
 
 
 

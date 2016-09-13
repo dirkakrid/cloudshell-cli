@@ -24,9 +24,10 @@ class CliService(CliServiceInterface):
     ROLLBACK_COMMAND = package_config.ROLLBACK_COMMAND
 
     @inject.params(config=CONFIG)
-    def __init__(self, config):
+    def __init__(self, config=None):
         if not config:
-            raise Exception(self.__class__.__name__, 'Config not defined')
+            return
+        #    raise Exception(self.__class__.__name__, 'Config not defined')
         """Override constants with global config values"""
         overridden_config = override_attributes_from_config(CliService, config=config)
         self._expected_map = overridden_config.EXPECTED_MAP
@@ -38,6 +39,19 @@ class CliService(CliServiceInterface):
         self._exit_config_mode_prompt_command = overridden_config.EXIT_CONFIG_MODE_PROMPT_COMMAND
         self._commit_command = overridden_config.COMMIT_COMMAND
         self._rollback_command = overridden_config.ROLLBACK_COMMAND
+
+
+    def set_session_data(self,retries,default_prompt,config_prompt,expected_map={},error_map={}):
+        self._expected_map = expected_map
+        self._error_map = error_map
+        self._command_retries = retries
+        self._prompt = default_prompt
+        self._config_mode_prompt = config_prompt
+        self._enter_config_mode_prompt_command = 'configure terminal'
+        self._exit_config_mode_prompt_command = 'exit'
+        self._commit_command = 'commit'
+        self._rollback_command = 'rollback'
+
 
     @inject.params(session=SESSION)
     def get_session_type(self, session):
