@@ -6,22 +6,29 @@ class Mode(Prompt):
 
     def __init__(self):
 
-        self.mode = 'default'
 
+        self.initiate_actions = None
 
-    def set_default_actions(self,actions_tuple_list):
+    def _set_actions(self,actions):
         '''
-        :param actions_tuple_list: [(action,prompt)]
-        :return:
+        :param actions: [(action1,prompt),(action2,prompt)...] or (action,prompt)
+        :return: None
         '''
 
-    def enter_mode(self,mode_tuple):
-        pass
+        if not isinstance(actions,list) or not isinstance(actions,tuple):
+            raise Exception("actions","Actions must be in type of list of nested tuple or a single tuple")
+        if isinstance(actions, tuple):
+                actions = [actions]
+        self.initiate_actions = Actions(actions)
+
+    def enter_mode(self,):pass
+
+
+
+
 
     def exit_mode(self,mode_tuple):
         pass
-
-
 
 
 class Actions(collections.MutableMapping):

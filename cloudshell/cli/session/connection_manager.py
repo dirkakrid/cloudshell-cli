@@ -30,26 +30,37 @@ class ConnectionManager(object):
     POOL_TIMEOUT = package_config.POOL_TIMEOUT
 
     @inject.params(config=CONFIG, logger=LOGGER)
-    def __init__(self, config, logger):
+    def __init__(self, logger,connection_map,connection_type,default_prompt, session_pool_size, pool_timeout,config=None):
+
         if not config:
-            raise Exception(self.__class__.__name__, 'Failed to read config for cloudshell-cli package')
-        """Override constants with global config values"""
-        overridden_config = override_attributes_from_config(ConnectionManager, config=config)
+            self._connection_map = connection_map  # overridden_config.CONNECTION_MAP
+            self._max_connections = session_pool_size  # call_if_callable(overridden_config.SESSION_POOL_SIZE)
+            if not self._max_connections:
+                self._max_connections = overridden_config.DEFAULT_SESSION_POOL_SIZE
+            self._prompt = default_prompt  # overridden_config.DEFAULT_PROMPT
+            self._connection_type_auto = overridden_config.CONNECTION_TYPE_AUTO
+            self._connection_type = connection_type  # overridden_config.CONNECTION_TYPE
+            self._default_connection_type = overridden_config.DEFAULT_CONNECTION_TYPE
+            self._pool_timeout = overridden_config.POOL_TIMEOUT
 
-        self._connection_map = overridden_config.CONNECTION_MAP
-        self._max_connections = call_if_callable(overridden_config.SESSION_POOL_SIZE)
-        if not self._max_connections:
-            self._max_connections = overridden_config.DEFAULT_SESSION_POOL_SIZE
-        self._prompt = overridden_config.DEFAULT_PROMPT
-        self._connection_type_auto = overridden_config.CONNECTION_TYPE_AUTO
-        self._connection_type = overridden_config.CONNECTION_TYPE
-        self._default_connection_type = overridden_config.DEFAULT_CONNECTION_TYPE
-        self._pool_timeout = overridden_config.POOL_TIMEOUT
 
-        self._session_pool = Queue(maxsize=self._max_connections)
-        self._existing_sessions = 0
-        if logger:
-            logger.debug('Connection manager created')
+        else:
+            """Override constants with global config values"""
+            overridden_config = override_attributes_from_config(ConnectionManager, config=config)
+            self._connection_map = overridden_config.CONNECTION_MAP
+            self._max_connections = call_if_callable(overridden_config.SESSION_POOL_SIZE)
+            if not self._max_connections:
+                self._max_connections = overridden_config.DEFAULT_SESSION_POOL_SIZE
+            self._prompt = overridden_config.DEFAULT_PROMPT
+            self._connection_type_auto = overridden_config.CONNECTION_TYPE_AUTO
+            self._connection_type = overridden_config.CONNECTION_TYPE
+            self._default_connection_type = overridden_config.DEFAULT_CONNECTION_TYPE
+            self._pool_timeout = overridden_config.POOL_TIMEOUT
+
+            self._session_pool = Queue(maxsize=self._max_connections)
+            self._existing_sessions = 0
+            if logger:
+                logger.debug('Connection manager created')
 
     @inject.params(logger=LOGGER)
     def _new_session(self, connection_type, logger=None):

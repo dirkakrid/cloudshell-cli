@@ -8,6 +8,8 @@ from cloudshell.cli.session.telnet_session import TelnetSession
 from cloudshell.shell.core.context_utils import get_attribute_by_name_wrapper, get_resource_address, \
     get_decrypted_password_by_attribute_name_wrapper
 
+from cloudshell.cli.session.connection_manager import ConnectionManager
+
 """Session types implemented in current package"""
 CONNECTION_TYPE_SSH = 'ssh'
 CONNECTION_TYPE_TELNET = 'telnet'
@@ -67,3 +69,24 @@ EXPECTED_MAP = OrderedDict()
 ERROR_MAP = OrderedDict()
 
 COMMAND_RETRIES = 10
+
+#*********************code that added for refactoring all the code bellow will be removed ***************************************************************************************
+
+def _get_session_type(self, argument):
+    session_types = {
+        'ssh': __import__('cloudshell.cli.session.ssh_session', fromlist=[self.sessions_map['ssh']]),
+        'telnet': __import__('cloudshell.cli.session.tcp_session', fromlist=[self.sessions_map['telnet']]),
+        'tcp': __import__('cloudshell.cli.session.telnet_session', fromlist=[self.sessions_map['tcp']])
+    }
+    func = session_types.get(argument, lambda: "auto")
+    if (argument in self.sessions_map):
+        return getattr(func, self.sessions_map.get(argument))
+    else:
+        return None
+
+def _initiate_connection_manager(session_type,session,default_prompt,session_pool_size,pool_timeout):
+    CONNECTION_MAP=OrderedDict()
+    CONNECTION_MAP[session_type] = session
+
+    cm = ConnectionManager()
+
