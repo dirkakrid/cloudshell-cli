@@ -35,10 +35,9 @@ def initiate_connection_manager(logger,session_type,ip,port,user,password,defaul
     CONNECTION_MAP[session_type] = session
     connection_manager = ConnectionManager.get_instance()
     connection_manager.logger = logger
-    print CONNECTION_MAP
-    connection_manager.session_manager = SessionManager(connection_map=CONNECTION_MAP)
+    connection_manager.session_manager = SessionManager(connection_type=session_type,prompt=default_prompt,connection_map=CONNECTION_MAP)
 
-    session = connection_manager.get_session_instance(connection_type=session_type, prompt=default_prompt)
+    session = connection_manager.get_session_instance()
     session.logger = logger
 
     session.hardware_expect('')
