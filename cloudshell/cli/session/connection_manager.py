@@ -224,6 +224,10 @@ class ConnectionManager(object):
         """
         return self._logger or inject.instance(LOGGER)
 
+    @logger.setter
+    def logger(self, logger):
+        self._logger = logger
+
     @property
     def config(self):
         """
@@ -242,6 +246,10 @@ class ConnectionManager(object):
             self._session_manager = SessionManager()
         return self._session_manager
 
+    @session_manager.setter
+    def session_manager(self, session_manager):
+        self._session_manager = session_manager
+
     @property
     def pool_manager(self):
         """
@@ -252,7 +260,7 @@ class ConnectionManager(object):
             self._pool_manager = Queue(self._max_pool_size)
         return self._pool_manager
 
-    def get_session_instance(self):
+    def get_session_instance(self, connection_type=None, prompt=None):
         """Return session object, takes it from pool or create new session
         :rtype: Session
         :raises: ConnectionManagerException
@@ -264,7 +272,7 @@ class ConnectionManager(object):
                 if not self.pool_manager.empty():
                     session = self.pool_manager.get(False)
                 elif self.session_manager.created_sessions < self.pool_manager.maxsize:
-                    session = self.session_manager.create_session()
+                    session = self.session_manager.create_session(connection_type=connection_type, prompt=prompt)
                 else:
                     self._SESSION_CONDITION.wait(self._pool_timeout)
                     if (time.time() - call_time) >= self._pool_timeout:
