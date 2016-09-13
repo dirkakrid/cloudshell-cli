@@ -8,7 +8,7 @@ from logging import Logger
 from cloudshell.cli.session.connection_manager_exceptions import SessionManagerException, ConnectionManagerException
 import inject
 from cloudshell.cli.helper.weak_key_dictionary_with_callback import WeakKeyDictionaryWithCallback
-import cloudshell.configuration.cloudshell_cli_configuration as package_config
+#import cloudshell.configuration.cloudshell_cli_configuration as package_config
 from cloudshell.shell.core.config_utils import call_if_callable, \
     override_attributes_from_config
 from cloudshell.configuration.cloudshell_shell_core_binding_keys import CONFIG, LOGGER
@@ -26,7 +26,8 @@ class SessionManager(object):
     DEFAULT_PROMPT = package_config.DEFAULT_PROMPT
     DEFAULT_CONNECTION_TYPE = package_config.DEFAULT_CONNECTION_TYPE
     '''
-    def __init__(self, logger=None, config=None):
+
+    def __init__(self, use_config=False,logger=None, config=None, connection_map=None):
         """
         SessionManager constructor
         :param logger:
@@ -38,17 +39,21 @@ class SessionManager(object):
         self._connection_map = connection_map
 
         self._sessions = []
-        """Override default configuration attributes"""
-        overridden_config = override_attributes_from_config(SessionManager, config=self.config)
-        self._connection_type_auto = overridden_config.CONNECTION_TYPE_AUTO
-        self._connection_type = overridden_config.CONNECTION_TYPE
+        if(use_config):
+            """Override default configuration attributes"""
+            overridden_config = override_attributes_from_config(SessionManager, config=self.config)
+            self._connection_type_auto = overridden_config.CONNECTION_TYPE_AUTO
+            self._connection_type = overridden_config.CONNECTION_TYPE
+            self._prompt = overridden_config.DEFAULT_PROMPT
+            self._default_connection_type = overridden_config.DEFAULT_CONNECTION_TYPE
+
         if not self._connection_map:
             self._connection_map = overridden_config.CONNECTION_MAP
-        self._prompt = overridden_config.DEFAULT_PROMPT
-        self._default_connection_type = overridden_config.DEFAULT_CONNECTION_TYPE
+
 
         """Lock"""
         self._SESSION_LOCK = RLock()
+
 
     @property
     def logger(self):
@@ -224,7 +229,9 @@ class ConnectionManager(object):
         :rtype: Logger
         """
         return self._logger or inject.instance(LOGGER)
-
+    @logger.setter
+    def logger(self, logger):
+        self._logger = logger
     @property
     def config(self):
         """
@@ -242,6 +249,11 @@ class ConnectionManager(object):
         if not self._session_manager:
             self._session_manager = SessionManager()
         return self._session_manager
+
+    @session_manager.setter
+    def session_manager(self, session_manager):
+        self._session_manager = session_manager
+
 
     @property
     def pool_manager(self):
