@@ -5,7 +5,7 @@ from threading import currentThread, Condition, RLock, Lock
 import time
 from logging import Logger
 
-import cloudshell.configuration.cloudshell_cli_configuration as package_config
+#import cloudshell.configuration.cloudshell_cli_configuration as package_config
 from cloudshell.cli.session.connection_manager_exceptions import SessionManagerException, ConnectionManagerException
 import inject
 from cloudshell.cli.helper.weak_key_dictionary_with_callback import WeakKeyDictionaryWithCallback
@@ -20,12 +20,13 @@ class SessionManager(object):
     """
     Create or remove session for defined connection type
     """
+    '''
     CONNECTION_TYPE_AUTO = package_config.CONNECTION_TYPE_AUTO
     CONNECTION_TYPE = package_config.CONNECTION_TYPE
     CONNECTION_MAP = package_config.CONNECTION_MAP
     DEFAULT_PROMPT = package_config.DEFAULT_PROMPT
     DEFAULT_CONNECTION_TYPE = package_config.DEFAULT_CONNECTION_TYPE
-
+    '''
     def __init__(self, logger=None, config=None):
         """
         SessionManager constructor
@@ -198,10 +199,11 @@ class ConnectionManager(object):
     """Class implements Object Pool pattern for sessions, creates and pool sessions for specific types"""
 
     """Configuration attributes"""
+    '''
     POOL_TIMEOUT = package_config.POOL_TIMEOUT
     SESSION_POOL_SIZE = package_config.SESSION_POOL_SIZE
     DEFAULT_SESSION_POOL_SIZE = package_config.DEFAULT_SESSION_POOL_SIZE
-
+    '''
     """Thread session container"""
     _SESSION_CONTAINER = WeakKeyDictionaryWithCallback()
 
@@ -211,7 +213,7 @@ class ConnectionManager(object):
     """Connection manager instance container"""
     _INSTANCE = None
 
-    def __init__(self, config=None, logger=None, session_manager=None, pool_manager=None):
+    def __init__(self, use_config= False,config=None, logger=None, session_manager=None, pool_manager=None):
         """
         Connection manager constructor
         :param config:
@@ -221,20 +223,18 @@ class ConnectionManager(object):
         :return:
         """
         """Used for unittests"""
-        self._config = config
-        self._logger = logger
-        self._session_manager = session_manager
-        self._pool_manager = pool_manager
 
-        """Override constants with global config values"""
-        overridden_config = override_attributes_from_config(ConnectionManager, config=self.config)
-        self._pool_timeout = overridden_config.POOL_TIMEOUT
-        self._max_pool_size = int(call_if_callable(
-            overridden_config.SESSION_POOL_SIZE) or overridden_config.DEFAULT_SESSION_POOL_SIZE)
+        if(use_config):
+            self._config = config
+            """Override constants with global config values"""
+            overridden_config = override_attributes_from_config(ConnectionManager, config=self.config)
+            self._pool_timeout = overridden_config.POOL_TIMEOUT
+            self._max_pool_size = int(call_if_callable(
+                overridden_config.SESSION_POOL_SIZE) or overridden_config.DEFAULT_SESSION_POOL_SIZE)
 
         """Session manager condition"""
         self._SESSION_CONDITION = Condition()
-        self.logger.debug('Connection manager created')
+
 
     @property
     def logger(self):
