@@ -2,14 +2,14 @@ from cloudshell.cli.Prompt import Prompt
 import collections
 
 
-class Mode(Prompt):
+class Mode():
 
     def __init__(self):
 
 
         self.initiate_actions = None
-        self.modes = None
         self.leave = None
+        self.state = None
 
     def _set_actions(self,actions):
         '''
@@ -28,14 +28,19 @@ class Mode(Prompt):
 
     def set_different_modes(self,modes_tuple):
         '''
-        :param modes_tuple: [(action1,prompt),(action2,prompt)...] or (action,prompt)
+        :param modes_tuple: [(action1,prompt),(action2,prompt)...]
         :return: None
         '''
-        if not isinstance(modes_tuple,list) and not isinstance(modes_tuple,tuple):
-            raise Exception("modes","Modes must be in type of list of nested tuple or a single tuple")
-        if isinstance(modes_tuple, tuple):
-            modes_tuple = [modes_tuple]
-        self.modes.update(MutableMapping(modes_tuple))
+        states = list()
+        prompts = list()
+        if not isinstance(modes_tuple,list):
+            raise Exception("modes","Modes must be in type of list of nested tuple")
+        for mode in modes_tuple:
+            states.append(mode[0])
+            prompts.append(mode[1])
+
+        self.state = Prompt(states, prompts)
+
 
     def default_mode(self,defualt_mode_tuple):
         if(defualt_mode_tuple[0]!='default'):
