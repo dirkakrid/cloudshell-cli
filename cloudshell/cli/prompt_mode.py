@@ -42,11 +42,13 @@ class Mode():
         self.state = Prompt(states, prompts)
 
 
-    def default_mode(self,defualt_mode_tuple):
-        if(defualt_mode_tuple[0]!='default'):
-            raise Exception("modes", "Default mode name must be default")
+    def get_default_prompt(self):
+        try:
+            return self.state.default
+        except Exception as err:
+            raise Exception('Defualt Prompt',"The defualt mode prompt is missing")
 
-        self.modes = MutableMapping([defualt_mode_tuple])
+
 
     def exit_mode(self,exit_tuple):
         self.leave =MutableMapping([exit_tuple])

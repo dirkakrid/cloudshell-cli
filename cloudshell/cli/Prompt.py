@@ -26,5 +26,3 @@ class Prompt(object):
         self.current_prompt_regex = prompt_regex
 
 
-c = Prompt(['state1','state2','state3'], [r'.*[>$#]\s*$',r'.*#\s*$','#\s*$'])
-print c.state1
