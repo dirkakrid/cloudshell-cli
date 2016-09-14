@@ -9,6 +9,7 @@ class Mode(Prompt):
 
         self.initiate_actions = None
         self.modes = None
+        self.leave = None
 
     def _set_actions(self,actions):
         '''
@@ -26,14 +27,24 @@ class Mode(Prompt):
 
 
     def set_modes(self,modes_tuple):
-        pass
+        '''
+        :param modes_tuple: [(action1,prompt),(action2,prompt)...] or (action,prompt)
+        :return: None
+        '''
+        if not isinstance(modes_tuple,list) or not isinstance(modes_tuple,tuple):
+            raise Exception("modes","Modes must be in type of list of nested tuple or a single tuple")
+        if isinstance(modes_tuple, tuple):
+                modes = [modes_tuple]
+        self.modes.update(MutableMapping(modes))
 
-    def set_default_mode(self,modes_tuple):
-        pass
+    def set_default_mode(self,defualt_mode_tuple):
+        if(defualt_mode_tuple!='default'):
+            raise Exception("modes", "Default mode name must be default")
 
+        self.modes = MutableMapping(defualt_mode_tuple)
 
-    def exit_mode(self,mode_tuple):
-        pass
+    def exit_mode(self,exit_command):
+        self.leave =exit_command
 
 
 class MutableMapping(collections.MutableMapping):
@@ -59,4 +70,5 @@ class MutableMapping(collections.MutableMapping):
 
     def __keytransform__(self, key):
         return key
+
 
