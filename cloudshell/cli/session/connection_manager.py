@@ -4,6 +4,7 @@ from threading import currentThread, Condition, RLock, Lock
 import time
 from logging import Logger
 
+from types import ModuleType
 from cloudshell.cli.session.connection_manager_exceptions import SessionManagerException, ConnectionManagerException
 import inject
 from cloudshell.cli.helper.weak_key_dictionary_with_callback import WeakKeyDictionaryWithCallback
@@ -66,7 +67,13 @@ class SessionManager(object):
         Property for config
         :rtype: ModuleType
         """
-        return self._config or inject.instance(CONFIG)
+        if self._config:
+            config = self._config
+        elif inject.is_configured():
+            config = inject.instance(CONFIG)
+        else:
+            config = ModuleType('config')
+        return config
 
     @property
     def created_sessions(self):
@@ -231,10 +238,16 @@ class ConnectionManager(object):
     @property
     def config(self):
         """
-        Property for the config
+        Property for config
         :rtype: ModuleType
         """
-        return self._config or inject.instance(CONFIG)
+        if self._config:
+            config = self._config
+        elif inject.is_configured():
+            config = inject.instance(CONFIG)
+        else:
+            config = ModuleType('config')
+        return config
 
     @property
     def session_manager(self):
