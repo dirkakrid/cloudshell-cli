@@ -230,6 +230,9 @@ class ConnectionManager(object):
         :rtype: Logger
         """
         return self._logger or inject.instance(LOGGER)
+    @logger.setter
+    def logger(self, logger):
+        self._logger = logger
 
     @logger.setter
     def logger(self, logger):
