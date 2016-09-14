@@ -119,13 +119,12 @@ class SessionManager(object):
                 session_object = self._connection_map[connection_type].create_session()
                 session_object.connect(re_string=prompt)
             except Exception as exception:
-                #self.logger.error('Cannot create session, Exception: {0}'.format(exception))
-                raise SessionManagerException(self.__class__.__name__,
-                                              'Failed to open connection, see logs for more details')
-            #self.logger.debug('Created new session')
+                self.logger.error('Cannot create session, Exception: {0}'.format(exception))
+                raise SessionManagerException(self.__class__.__name__,'Failed to open connection, see logs for more details')
+            self.logger.debug('Created new session')
         else:
             err_msg = 'Connection type \'{0}\' not defined'.format(connection_type)
-            #self.logger.error(err_msg)
+            self.logger.error(err_msg)
             raise SessionManagerException(self.__class__.__name__, err_msg)
         self._sessions.append(session_object)
         return session_object
@@ -140,11 +139,11 @@ class SessionManager(object):
 
         if not prompt:
             prompt = self._prompt
-        #if not prompt:
-        #    self.logger.warning('Provided Prompt for the session is empty!')
+        if not prompt:
+            self.logger.warning('Provided Prompt for the session is empty!')
 
-        #self.logger.info('\n-------------------------------------------------------------')
-        #self.logger.info('Connection - {0}'.format(connection_type))
+        self.logger.info('\n-------------------------------------------------------------')
+        self.logger.info('Connection - {0}'.format(connection_type))
 
         with self._SESSION_LOCK:
             session_object = None
@@ -152,20 +151,20 @@ class SessionManager(object):
                 session_object = self._new_session(connection_type, prompt)
             else:
                 for key in self._connection_map:
-                    #self.logger.info('\n--------------------------------------')
-                    #self.logger.info('Trying to open {0} connection ...'.format(key))
+                    self.logger.info('\n--------------------------------------')
+                    self.logger.info('Trying to open {0} connection ...'.format(key))
                     try:
                         session_object = self._new_session(key, prompt)
                         if session_object:
                             break
-                    except Exception as error_object:pass
-                        #self.logger.error(traceback.format_exc())
-                        #self.logger.error(
-                            #'{0} connection failed with error msg: {1}'.format(key.upper(), error_object.message))
+                    except Exception as error_object:
+                        self.logger.error(traceback.format_exc())
+                        self.logger.error(
+                            '{0} connection failed with error msg: {1}'.format(key.upper(), error_object.message))
 
             if session_object is None:
                 err_msg = 'Failed to open connection to device, see logs for more details'
-                #self.logger.error(err_msg)
+                self.logger.error(err_msg)
                 raise SessionManagerException(self.__class__.__name__, err_msg)
 
             return session_object
