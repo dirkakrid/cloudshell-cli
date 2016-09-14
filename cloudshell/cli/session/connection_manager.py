@@ -4,11 +4,11 @@ from threading import currentThread, Condition, RLock, Lock
 import time
 from logging import Logger
 
-#import cloudshell.configuration.cloudshell_cli_configuration as package_config
+from types import ModuleType
 from cloudshell.cli.session.connection_manager_exceptions import SessionManagerException, ConnectionManagerException
 import inject
 from cloudshell.cli.helper.weak_key_dictionary_with_callback import WeakKeyDictionaryWithCallback
-#import cloudshell.configuration.cloudshell_cli_configuration as package_config
+import cloudshell.configuration.cloudshell_cli_configuration as package_config
 from cloudshell.shell.core.config_utils import call_if_callable, \
     override_attributes_from_config
 from cloudshell.configuration.cloudshell_shell_core_binding_keys import CONFIG, LOGGER
@@ -19,13 +19,11 @@ class SessionManager(object):
     """
     Create or remove session for defined connection type
     """
-    '''
     CONNECTION_TYPE_AUTO = package_config.CONNECTION_TYPE_AUTO
     CONNECTION_TYPE = package_config.CONNECTION_TYPE
     CONNECTION_MAP = package_config.CONNECTION_MAP
     DEFAULT_PROMPT = package_config.DEFAULT_PROMPT
     DEFAULT_CONNECTION_TYPE = package_config.DEFAULT_CONNECTION_TYPE
-    '''
 
     def __init__(self, connection_type,prompt,use_config=False,logger=None, config=None, connection_map=None):
         """
@@ -50,13 +48,8 @@ class SessionManager(object):
             self._prompt = overridden_config.DEFAULT_PROMPT
             self._default_connection_type = overridden_config.DEFAULT_CONNECTION_TYPE
 
-        if not self._connection_map:
-            self._connection_map = overridden_config.CONNECTION_MAP
-
-
         """Lock"""
         self._SESSION_LOCK = RLock()
-
 
     @property
     def logger(self):
@@ -76,7 +69,13 @@ class SessionManager(object):
         Property for config
         :rtype: ModuleType
         """
-        return self._config or inject.instance(CONFIG)
+        if self._config:
+            config = self._config
+        elif inject.is_configured():
+            config = inject.instance(CONFIG)
+        else:
+            config = ModuleType('config')
+        return config
 
     @property
     def created_sessions(self):
@@ -99,7 +98,7 @@ class SessionManager(object):
             connection_type = self._connection_type
         else:
             err_msg = 'Unknown connection type {0}'.format(self._connection_type)
-            #self.logger.error(err_msg)
+            self.logger.error(err_msg)
             raise SessionManagerException(self.__class__.__name__, err_msg)
 
         if not connection_type:
@@ -237,13 +236,24 @@ class ConnectionManager(object):
     @logger.setter
     def logger(self, logger):
         self._logger = logger
+
+    @logger.setter
+    def logger(self, logger):
+        self._logger = logger
+
     @property
     def config(self):
         """
-        Property for the config
+        Property for config
         :rtype: ModuleType
         """
-        return self._config or inject.instance(CONFIG)
+        if self._config:
+            config = self._config
+        elif inject.is_configured():
+            config = inject.instance(CONFIG)
+        else:
+            config = ModuleType('config')
+        return config
 
     @property
     def session_manager(self):
@@ -259,7 +269,6 @@ class ConnectionManager(object):
     def session_manager(self, session_manager):
         self._session_manager = session_manager
 
-
     @property
     def pool_manager(self):
         """
@@ -270,7 +279,7 @@ class ConnectionManager(object):
             self._pool_manager = Queue(self._max_pool_size)
         return self._pool_manager
 
-    def get_session_instance(self):
+    def get_session_instance(self, connection_type=None, prompt=None):
         """Return session object, takes it from pool or create new session
         :rtype: Session
         :raises: ConnectionManagerException
@@ -282,7 +291,7 @@ class ConnectionManager(object):
                 if not self.pool_manager.empty():
                     session = self.pool_manager.get(False)
                 elif self.session_manager.created_sessions < self.pool_manager.maxsize:
-                    session = self.session_manager.create_session()
+                    session = self.session_manager.create_session(connection_type=connection_type, prompt=prompt)
                 else:
                     self._SESSION_CONDITION.wait(self._pool_timeout)
                     if (time.time() - call_time) >= self._pool_timeout:
