@@ -8,6 +8,7 @@ class Mode(Prompt):
 
 
         self.initiate_actions = None
+        self.modes = None
 
     def _set_actions(self,actions):
         '''
@@ -19,19 +20,23 @@ class Mode(Prompt):
             raise Exception("actions","Actions must be in type of list of nested tuple or a single tuple")
         if isinstance(actions, tuple):
                 actions = [actions]
-        self.initiate_actions = Actions(actions)
+        self.initiate_actions = MutableMapping(actions)
 
     def enter_mode(self,mode_tuple):pass
 
 
+    def set_modes(self,modes_tuple):
+        pass
 
+    def set_default_mode(self,modes_tuple):
+        pass
 
 
     def exit_mode(self,mode_tuple):
         pass
 
 
-class Actions(collections.MutableMapping):
+class MutableMapping(collections.MutableMapping):
 
     def __init__(self, *args, **kwargs):
         self.store = dict()
@@ -54,3 +59,4 @@ class Actions(collections.MutableMapping):
 
     def __keytransform__(self, key):
         return key
+
