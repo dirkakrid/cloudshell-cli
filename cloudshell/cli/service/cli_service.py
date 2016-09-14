@@ -1,6 +1,7 @@
 import time
 import traceback
 
+from types import ModuleType
 from cloudshell.cli.service.cli_service_interface import CliServiceInterface
 from cloudshell.cli.service.cli_exceptions import CommandExecutionException
 from cloudshell.cli.session.session_exceptions import SessionLoopDetectorException, SessionLoopLimitException
@@ -23,12 +24,12 @@ class CliService(CliServiceInterface):
     COMMIT_COMMAND = package_config.COMMIT_COMMAND
     ROLLBACK_COMMAND = package_config.ROLLBACK_COMMAND
 
-    @inject.params(config=CONFIG)
-    def __init__(self, config):
-        if not config:
-            raise Exception(self.__class__.__name__, 'Config not defined')
+    def __init__(self, config=None, logger=None):
+        self._config = config
+        self._logger = logger
+
         """Override constants with global config values"""
-        overridden_config = override_attributes_from_config(CliService, config=config)
+        overridden_config = override_attributes_from_config(CliService, config=self.config)
         self._expected_map = overridden_config.EXPECTED_MAP
         self._error_map = overridden_config.ERROR_MAP
         self._command_retries = overridden_config.COMMAND_RETRIES
@@ -39,12 +40,38 @@ class CliService(CliServiceInterface):
         self._commit_command = overridden_config.COMMIT_COMMAND
         self._rollback_command = overridden_config.ROLLBACK_COMMAND
 
+    @property
+    def config(self):
+        """
+        Property for config
+        :rtype: ModuleType
+        """
+        if self._config:
+            config = self._config
+        elif inject.is_configured():
+            config = inject.instance(CONFIG)
+        else:
+            config = ModuleType('config')
+        return config
+
+    @property
+    def logger(self):
+        """
+        Property for the logger
+        :rtype: Logger
+        """
+        return self._logger or inject.instance(LOGGER)
+
+    @logger.setter
+    def logger(self, logger):
+        self._logger = logger
+
     @inject.params(session=SESSION)
     def get_session_type(self, session):
         return session.session_type
 
-    @inject.params(logger=LOGGER, session=SESSION)
-    def send_config_command(self, command, expected_str=None, expected_map=None, error_map=None, logger=None,
+    @inject.params(session=SESSION)
+    def send_config_command(self, command, expected_str=None, expected_map=None, error_map=None,
                             session=None, **optional_args):
         """Send command into configuration mode, enter to config mode if needed
         :param command: command to send
@@ -62,8 +89,8 @@ class CliService(CliServiceInterface):
         # logger.info(out)
         return out
 
-    @inject.params(logger=LOGGER, session=SESSION)
-    def send_command(self, command, expected_str=None, expected_map=None, error_map=None, logger=None, session=None,
+    @inject.params(session=SESSION)
+    def send_command(self, command, expected_str=None, expected_map=None, error_map=None, session=None,
                      **optional_args):
         """Send command in default mode
 
@@ -81,12 +108,11 @@ class CliService(CliServiceInterface):
                                      session=session, **optional_args)
         except CommandExecutionException as e:
             self.rollback()
-            logger.error(e)
+            self.logger.error(e)
             raise e
         return out
 
-    @inject.params(logger=LOGGER)
-    def _send_command(self, command, expected_str=None, expected_map=None, error_map=None, logger=None, session=None,
+    def _send_command(self, command, expected_str=None, expected_map=None, error_map=None, session=None,
                       is_need_default_prompt=True, command_retries=None, **optional_args):
         """Send command
 
@@ -121,14 +147,13 @@ class CliService(CliServiceInterface):
             except (CommandExecutionException, SessionLoopDetectorException, SessionLoopLimitException):
                 raise
             except Exception as e:
-                logger.error(e)
+                self.logger.error(e)
                 if retry == command_retries - 1:
-                    logger.error(traceback.format_exc())
+                    self.logger.error(traceback.format_exc())
                     raise Exception('Failed to send command')
                 session.reconnect(self._prompt)
         return out
 
-    @inject.params(logger=LOGGER)
     def send_command_list(self, commands_list, send_command_func=None, expected_map=None, error_map=None,
                           **optional_args):
         output = ""
@@ -139,8 +164,8 @@ class CliService(CliServiceInterface):
                                         **optional_args)
         return output
 
-    @inject.params(logger=LOGGER, session=SESSION)
-    def exit_configuration_mode(self, logger=None, session=None, **optional_args):
+    @inject.params(session=SESSION)
+    def exit_configuration_mode(self, session=None, **optional_args):
         """Send 'enter' to SSH console to get prompt,
         if config prompt received , send 'exit' command, change _prompt to DEFAULT
         else: return
@@ -161,8 +186,8 @@ class CliService(CliServiceInterface):
 
         return out
 
-    @inject.params(logger=LOGGER, session=SESSION)
-    def _enter_configuration_mode(self, logger=None, session=None, **optional_args):
+    @inject.params(session=SESSION)
+    def _enter_configuration_mode(self, session=None, **optional_args):
         """Send 'enter' to SSH console to get prompt,
         if default prompt received , send 'configure terminal' command, change _prompt to CONFIG_MODE
         else: return
@@ -175,7 +200,7 @@ class CliService(CliServiceInterface):
             out = self._send_command(' ', expected_str=self._prompt + "|" + self._config_mode_prompt, session=session,
                                      **optional_args)
             if not out:
-                logger.error('Failed to get prompt, retrying ...')
+                self.logger.error('Failed to get prompt, retrying ...')
                 time.sleep(1)
 
             elif not re.search(self._config_mode_prompt, out):
@@ -197,7 +222,7 @@ class CliService(CliServiceInterface):
     def rollback(self, expected_map=None):
         self.send_config_command(self._rollback_command, expected_map=expected_map)
 
-    @inject.params(logger=LOGGER, session=SESSION, cm=CONNECTION_MANAGER)
+    @inject.params(session=SESSION, cm=CONNECTION_MANAGER)
     def destroy_threaded_session(self, session=None, logger=None, cm=None):
         """
 
