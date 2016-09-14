@@ -64,7 +64,7 @@ class ExpectSession(Session):
         self._logger = logger
 
         """Override constants with global config values"""
-        overridden_config = override_attributes_from_config(ExpectSession)
+        overridden_config = override_attributes_from_config(ExpectSession, config=ModuleType('config'))
 
         self._max_loop_retries = overridden_config.HE_MAX_LOOP_RETRIES
         self._empty_loop_timeout = overridden_config.HE_EMPTY_LOOP_TIMEOUT
