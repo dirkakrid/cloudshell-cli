@@ -43,8 +43,8 @@ class Mode(Prompt):
 
         self.modes = MutableMapping(defualt_mode_tuple)
 
-    def exit_mode(self,exit_command):
-        self.leave =exit_command
+    def exit_mode(self,exit_tuple):
+        self.leave =MutableMapping([exit_tuple])
 
 
 class MutableMapping(collections.MutableMapping):
