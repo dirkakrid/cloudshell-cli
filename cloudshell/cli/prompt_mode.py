@@ -17,31 +17,31 @@ class Mode(Prompt):
         :return: None
         '''
 
-        if not isinstance(actions,list) or not isinstance(actions,tuple):
+        if not isinstance(actions,list) and not isinstance(actions,tuple):
             raise Exception("actions","Actions must be in type of list of nested tuple or a single tuple")
         if isinstance(actions, tuple):
                 actions = [actions]
         self.initiate_actions = MutableMapping(actions)
 
-    def enter_mode(self,mode_tuple):pass
+    def enter_mode(self,mode_obj):pass
 
 
-    def set_modes(self,modes_tuple):
+    def set_different_modes(self,modes_tuple):
         '''
         :param modes_tuple: [(action1,prompt),(action2,prompt)...] or (action,prompt)
         :return: None
         '''
-        if not isinstance(modes_tuple,list) or not isinstance(modes_tuple,tuple):
+        if not isinstance(modes_tuple,list) and not isinstance(modes_tuple,tuple):
             raise Exception("modes","Modes must be in type of list of nested tuple or a single tuple")
         if isinstance(modes_tuple, tuple):
-                modes = [modes_tuple]
-        self.modes.update(MutableMapping(modes))
+            modes_tuple = [modes_tuple]
+        self.modes.update(MutableMapping(modes_tuple))
 
-    def set_default_mode(self,defualt_mode_tuple):
-        if(defualt_mode_tuple!='default'):
+    def default_mode(self,defualt_mode_tuple):
+        if(defualt_mode_tuple[0]!='default'):
             raise Exception("modes", "Default mode name must be default")
 
-        self.modes = MutableMapping(defualt_mode_tuple)
+        self.modes = MutableMapping([defualt_mode_tuple])
 
     def exit_mode(self,exit_tuple):
         self.leave =MutableMapping([exit_tuple])

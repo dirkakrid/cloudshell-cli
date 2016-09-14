@@ -8,7 +8,7 @@ from types import ModuleType
 from cloudshell.cli.session.connection_manager_exceptions import SessionManagerException, ConnectionManagerException
 import inject
 from cloudshell.cli.helper.weak_key_dictionary_with_callback import WeakKeyDictionaryWithCallback
-import cloudshell.configuration.cloudshell_cli_configuration as package_config
+#import cloudshell.configuration.cloudshell_cli_configuration as package_config
 from cloudshell.shell.core.config_utils import call_if_callable, \
     override_attributes_from_config
 from cloudshell.configuration.cloudshell_shell_core_binding_keys import CONFIG, LOGGER
@@ -19,12 +19,13 @@ class SessionManager(object):
     """
     Create or remove session for defined connection type
     """
+    '''
     CONNECTION_TYPE_AUTO = package_config.CONNECTION_TYPE_AUTO
     CONNECTION_TYPE = package_config.CONNECTION_TYPE
     CONNECTION_MAP = package_config.CONNECTION_MAP
     DEFAULT_PROMPT = package_config.DEFAULT_PROMPT
     DEFAULT_CONNECTION_TYPE = package_config.DEFAULT_CONNECTION_TYPE
-
+    '''
     def __init__(self, connection_type,prompt,use_config=False,logger=None, config=None, connection_map=None):
         """
         SessionManager constructor
