@@ -1,4 +1,4 @@
-from cloudshell.cli.prompt import Prompt
+from cloudshell.cli.Prompt import Prompt
 import collections
 
 
