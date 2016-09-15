@@ -92,13 +92,12 @@ cli = Cli()
 cli.set_default_actions([('action1','prompt'),('action2','prompt')])
 state = cli.set_states([('default','r.*[>$#]\s*$'),('admin','#\s*$')])
 
-with cli.new_session(session_type='ssh',ip='192.168.42.235',user='root',password='Password1') as default_session:
+with cli.new_session(session_type='ssh',ip='192.168.28.150',user='root',password='Juniper') as default_session:
     default_session.run_command('show version')
     with default_session.enter_mode(state.admin, enter_command='config t', exit_command='exit') as admin:
         print "ok"
 
 '''
-
 from cloudshell.cli.cli import Cli
 
 cli = Cli()
