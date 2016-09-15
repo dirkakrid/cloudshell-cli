@@ -23,8 +23,6 @@ class Mode():
                 actions = [actions]
         self.initiate_actions = MutableMapping(actions)
 
-    def enter_mode(self,mode_obj):pass
-
 
     def set_different_modes(self,modes_tuple):
         '''

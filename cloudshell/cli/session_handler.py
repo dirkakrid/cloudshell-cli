@@ -1,16 +1,23 @@
 
 from cloudshell.cli.service.cli_service import CliService
+from cloudshell.cli.session.session import Session
 
 
 
 
 class SessionHandler(object):
     def __init__(self,session):
+        """
+
+        :param session:
+         :type session: Session
+        """
 
         self.session = session
         self.cli_service = CliService()
 
-
+    def enter_mode(self):
+        pass
 
     def __enter__(self):
         return self
@@ -18,8 +25,8 @@ class SessionHandler(object):
     def __exit__(self, type, value, traceback):
         print '__exit__()'
 
-    def run_command(self, command, command_input=dict()):
-        print self.cli_service.send_command('show version',session=self.session)
+    def run_command(self,command,  prompt,command_input=dict()):
+        print self.session.hardware_expect(data_str='show version',session=self.session)
 
 
         '''

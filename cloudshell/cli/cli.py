@@ -84,16 +84,21 @@ class Cli(Mode):
 
 c=Cli()
 
+'''
 
+import paramiko
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect('192.168.28.150',22,'root','Juniper')
+#I added the host to known hosts with paramiko - should check it .
 
-from cloudshell.cli.cli import Cli
-
+'''
 cli = Cli()
 cli.set_default_actions([('action1','prompt'),('action2','prompt')])
-state = cli.set_states([('default','r.*[>$#]\s*$'),('admin','#\s*$')])
+state = cli.set_states([('default','[>$#]\s*$'),('admin','#\s*$')])
 
 with cli.new_session(session_type='ssh',ip='192.168.28.150',user='root',password='Juniper') as default_session:
-    default_session.run_command('show version')
+    default_session.run_command('show version',state.default)
     with default_session.enter_mode(state.admin, enter_command='config t', exit_command='exit') as admin:
         print "ok"
 
