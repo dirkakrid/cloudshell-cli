@@ -60,7 +60,11 @@ class Cli(Mode):
         connection_manager = ConnectionManager.get_instance()
         connection_manager.logger = logger
         connection_manager.session_manager = SessionManager(logger=logger,connection_type=session_type,prompt=default_prompt,connection_map=CONNECTION_MAP)
-        return connection_manager
+        session = connection_manager.get_session_instance(connection_type=session_type, prompt=default_prompt)
+
+        connection_manager.return_session_instance(session)
+
+        return session
 
     def _get_session(self,session_type,ip,port,user,password):
         session_class = self._get_session_type(session_type)

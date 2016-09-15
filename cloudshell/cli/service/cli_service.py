@@ -14,31 +14,31 @@ import inject
 
 
 class CliService(CliServiceInterface):
-    EXPECTED_MAP = package_config.EXPECTED_MAP
-    ERROR_MAP = package_config.ERROR_MAP
-    COMMAND_RETRIES = package_config.COMMAND_RETRIES
-    DEFAULT_PROMPT = package_config.DEFAULT_PROMPT
-    CONFIG_MODE_PROMPT = package_config.CONFIG_MODE_PROMPT
-    ENTER_CONFIG_MODE_PROMPT_COMMAND = package_config.ENTER_CONFIG_MODE_PROMPT_COMMAND
-    EXIT_CONFIG_MODE_PROMPT_COMMAND = package_config.EXIT_CONFIG_MODE_PROMPT_COMMAND
-    COMMIT_COMMAND = package_config.COMMIT_COMMAND
-    ROLLBACK_COMMAND = package_config.ROLLBACK_COMMAND
+    #EXPECTED_MAP = package_config.EXPECTED_MAP
+    #ERROR_MAP = package_config.ERROR_MAP
+    #COMMAND_RETRIES = package_config.COMMAND_RETRIES
+    #DEFAULT_PROMPT = package_config.DEFAULT_PROMPT
+    #CONFIG_MODE_PROMPT = package_config.CONFIG_MODE_PROMPT
+    #ENTER_CONFIG_MODE_PROMPT_COMMAND = package_config.ENTER_CONFIG_MODE_PROMPT_COMMAND
+    #EXIT_CONFIG_MODE_PROMPT_COMMAND = package_config.EXIT_CONFIG_MODE_PROMPT_COMMAND
+    #COMMIT_COMMAND = package_config.COMMIT_COMMAND
+    #ROLLBACK_COMMAND = package_config.ROLLBACK_COMMAND
 
-    def __init__(self, config=None, logger=None):
+    def __init__(self, use_config=False,config=None, logger=None):
         self._config = config
         self._logger = logger
-
-        """Override constants with global config values"""
-        overridden_config = override_attributes_from_config(CliService, config=self.config)
-        self._expected_map = overridden_config.EXPECTED_MAP
-        self._error_map = overridden_config.ERROR_MAP
-        self._command_retries = overridden_config.COMMAND_RETRIES
-        self._prompt = overridden_config.DEFAULT_PROMPT
-        self._config_mode_prompt = overridden_config.CONFIG_MODE_PROMPT
-        self._enter_config_mode_prompt_command = overridden_config.ENTER_CONFIG_MODE_PROMPT_COMMAND
-        self._exit_config_mode_prompt_command = overridden_config.EXIT_CONFIG_MODE_PROMPT_COMMAND
-        self._commit_command = overridden_config.COMMIT_COMMAND
-        self._rollback_command = overridden_config.ROLLBACK_COMMAND
+        if use_config:
+            """Override constants with global config values"""
+            overridden_config = override_attributes_from_config(CliService, config=self.config)
+            self._expected_map = overridden_config.EXPECTED_MAP
+            self._error_map = overridden_config.ERROR_MAP
+            self._command_retries = overridden_config.COMMAND_RETRIES
+            self._prompt = overridden_config.DEFAULT_PROMPT
+            self._config_mode_prompt = overridden_config.CONFIG_MODE_PROMPT
+            self._enter_config_mode_prompt_command = overridden_config.ENTER_CONFIG_MODE_PROMPT_COMMAND
+            self._exit_config_mode_prompt_command = overridden_config.EXIT_CONFIG_MODE_PROMPT_COMMAND
+            self._commit_command = overridden_config.COMMIT_COMMAND
+            self._rollback_command = overridden_config.ROLLBACK_COMMAND
 
     @property
     def config(self):
@@ -102,7 +102,7 @@ class CliService(CliServiceInterface):
         :return: received output buffer
         """
 
-        self.exit_configuration_mode(session)
+        self.exit_configuration_mode(session=session)
         try:
             out = self._send_command(command, expected_str=expected_str, expected_map=expected_map, error_map=error_map,
                                      session=session, **optional_args)
