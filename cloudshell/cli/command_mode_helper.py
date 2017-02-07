@@ -65,6 +65,7 @@ class CommandModeHelper(NodeOperations):
         :return:
         :rtype: dict
         """
+        defined_modes = {}
 
         def _create_child_modes(instance, child_dict):
             instance_dict = {}

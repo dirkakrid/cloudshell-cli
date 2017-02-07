@@ -59,6 +59,16 @@ class TelnetSession(ExpectSession, ConnectionParams):
         action_map['[Ll]ogin:|[Uu]ser:|[Uu]sername:'] = lambda session, logger: session.send_line(session.username,
                                                                                                   logger)
         action_map['[Pp]assword:'] = lambda session, logger: session.send_line(session.password, logger)
+
+        empty_key = r'.*'
+
+        def empty_action(ses, log):
+            ses.send_line('', log)
+            if empty_key in action_map:
+                del action_map[empty_key]
+
+        action_map[empty_key] = empty_action
+
         out = self.hardware_expect(None, expected_string=prompt, timeout=self._timeout, logger=logger,
                                    action_map=action_map)
         if self.on_session_start and callable(self.on_session_start):

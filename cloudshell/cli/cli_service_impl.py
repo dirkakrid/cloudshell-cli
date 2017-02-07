@@ -16,20 +16,20 @@ class CommandModeContextManager(object):
         :type command_mode: CommandMode
         """
         self._cli_service = cli_service
-        self._command_mode = command_mode
+        self._requested_command_mode = command_mode
         self._logger = logger
-        self._previous_mode = None
+        self._base_command_mode = self._cli_service.command_mode
 
     def __enter__(self):
         """
         :return:
         :rtype: CliService
         """
-        self._command_mode.step_up(self._cli_service)
+        self._cli_service.change_mode(self._requested_command_mode)
         return self._cli_service
 
     def __exit__(self, type, value, traceback):
-        self._command_mode.step_down(self._cli_service)
+        self._cli_service.change_mode(self._base_command_mode)
 
 
 class CliServiceImpl(CliService):
@@ -49,11 +49,11 @@ class CliServiceImpl(CliService):
         self._logger = logger
         self.command_mode = CommandModeHelper.determine_current_mode(self.session, command_mode, self._logger)
         self.command_mode.enter_actions(self)
-        self._change_mode(command_mode)
+        self.change_mode(command_mode)
 
     def enter_mode(self, command_mode):
         """
-        Enter child mode
+        Enter specific mode
         :param command_mode:
         :type command_mode: CommandMode
         :return:
@@ -84,7 +84,7 @@ class CliServiceImpl(CliService):
         return self.session.hardware_expect(command, expected_string=expected_string, action_map=action_map,
                                             error_map=error_map, logger=logger, *args, **kwargs)
 
-    def _change_mode(self, requested_command_mode):
+    def change_mode(self, requested_command_mode):
         """
         Change command mode
         :param requested_command_mode:
@@ -105,4 +105,4 @@ class CliServiceImpl(CliService):
         requested_command_mode = self.command_mode
         self.command_mode = CommandModeHelper.determine_current_mode(self.session, self.command_mode, self._logger)
         self.command_mode.enter_actions(self)
-        self._change_mode(requested_command_mode)
+        self.change_mode(requested_command_mode)

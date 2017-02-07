@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import socket
 import traceback
 
@@ -63,7 +64,17 @@ class SSHSession(ExpectSession, ConnectionParams):
         self._current_channel = self._handler.invoke_shell()
         self._current_channel.settimeout(self._timeout)
 
-        self.hardware_expect(None, expected_string=prompt, timeout=self._timeout, logger=logger)
+        action_map = OrderedDict()
+        empty_key = r'.*'
+
+        def empty_action(ses, log):
+            ses.send_line('', log)
+            if empty_key in action_map:
+                del action_map[empty_key]
+
+        action_map[empty_key] = empty_action
+
+        self.hardware_expect(None, expected_string=prompt, action_map=action_map, timeout=self._timeout, logger=logger)
         if self.on_session_start and callable(self.on_session_start):
             self.on_session_start(self, logger)
         self._active = True

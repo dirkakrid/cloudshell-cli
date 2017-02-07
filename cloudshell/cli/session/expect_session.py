@@ -189,6 +189,7 @@ class ExpectSession(Session):
                 # logger.debug('Expected str: {}'.format(expected_string))
                 output_list.append(output_str)
                 is_correct_exit = True
+                break
 
             for action_key in action_map:
                 result_match = re.search(action_key, output_str, re.DOTALL)
@@ -205,8 +206,8 @@ class ExpectSession(Session):
                     output_str = ''
                     break
 
-            if is_correct_exit:
-                break
+                    # if is_correct_exit:
+                    #     break
 
         if not is_correct_exit:
             raise SessionLoopLimitException(self.__class__.__name__,

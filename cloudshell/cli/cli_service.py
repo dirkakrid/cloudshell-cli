@@ -18,5 +18,9 @@ class CliService(object):
         pass
 
     @abstractmethod
+    def change_mode(self, command_mode):
+        pass
+
+    @abstractmethod
     def reconnect(self, timeout=None):
         pass
