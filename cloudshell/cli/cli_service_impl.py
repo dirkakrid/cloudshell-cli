@@ -1,7 +1,7 @@
 from cloudshell.cli.command_mode_helper import CommandModeHelper
 from cloudshell.cli.command_mode import CommandMode
 from cloudshell.cli.cli_service import CliService
-
+import re
 
 class CommandModeContextManager(object):
     """
@@ -83,6 +83,23 @@ class CliServiceImpl(CliService):
         self.session.logger = logger
         return self.session.hardware_expect(command, expected_string=expected_string, action_map=action_map,
                                             error_map=error_map, logger=logger, *args, **kwargs)
+
+    def on_session_start(self, modes_list,logger):
+        """Send default commands to configure/clear session outputs
+        :return:
+        """
+        for mode in modes_list:
+            self._enter_mode(mode=mode, logger=logger)
+            for command in mode.commands:
+                self.session.hardware_expect(command, mode.prompt, logger)
+
+    def _enter_mode(self, mode ,logger):
+
+        self.session.hardware_expect(mode.enter_command, mode.prompt, action_map=mode.expect_map, logger=logger)
+        result = self.session.hardware_expect('', '{0}'.format(mode.prompt),
+                                         logger)
+        if not re.search(mode.prompt, result):
+            raise Exception('enter_mode', 'There was an error entering the mode')
 
     def _change_mode(self, requested_command_mode):
         """

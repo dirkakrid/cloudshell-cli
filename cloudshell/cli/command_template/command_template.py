@@ -15,6 +15,7 @@ class CommandTemplate:
         :return:
         :rtype: OrderedDict()
         """
+
         return self._action_map
 
     @property

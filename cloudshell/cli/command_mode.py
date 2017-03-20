@@ -1,6 +1,6 @@
 from cloudshell.cli.cli_exception import CliException
 from cloudshell.cli.node import Node
-
+import re
 
 class CommandModeException(CliException):
     pass
@@ -13,8 +13,10 @@ class CommandMode(Node):
 
     RELATIONS_DICT = {}
 
-    def __init__(self, prompt, enter_command=None, exit_command=None, enter_action_map=None, exit_action_map=None,
-                 enter_error_map=None, exit_error_map=None, parent_mode=None, enter_actions=None):
+    def __init__(self, prompt, enter_command=None, exit_command=None, enter_action_map=None, \
+                 exit_action_map=None,
+                 enter_error_map=None, exit_error_map=None, parent_mode=None, enter_actions=None, \
+                 expect_map = None,commands=[]):
         """
             :param prompt: Prompt of this mode
             :type prompt: str
@@ -42,16 +44,20 @@ class CommandMode(Node):
             exit_action_map = {}
         if not enter_action_map:
             enter_action_map = {}
+        if not expect_map:
+            expect_map = {}
 
         super(CommandMode, self).__init__()
         self.prompt = prompt
-        self._enter_command = enter_command
+        self.enter_command = enter_command
         self._exit_command = exit_command
         self._enter_action_map = enter_action_map
         self._exit_action_map = exit_action_map
         self._enter_error_map = enter_error_map
         self._exit_error_map = exit_error_map
         self._enter_actions = enter_actions
+        self.expect_map = expect_map
+        self.commands = commands
 
         if parent_mode:
             self.add_parent_mode(parent_mode)
@@ -97,3 +103,8 @@ class CommandMode(Node):
         """
         if self._enter_actions:
             self._enter_actions(cli_service)
+
+
+
+
+

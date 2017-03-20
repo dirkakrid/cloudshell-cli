@@ -80,7 +80,7 @@ class SwitchCliHandler(CliHandlerImpl):
         password = get_attribute_by_name(attribute_name='Password', context=self._context)
         return password
 
-
+    '''
     def on_session_start(self, session, logger):
         """Send default commands to configure/clear session outputs
         :return:
@@ -92,7 +92,7 @@ class SwitchCliHandler(CliHandlerImpl):
         self._enter_config_mode(session, logger)
         session.hardware_expect('no logging console', ConfigCommandMode.PROMPT, logger)
         session.hardware_expect('exit', EnableCommandMode.PROMPT, logger)
-
+    '''
 
     def enter_enable_mode(self, session, logger):
 
