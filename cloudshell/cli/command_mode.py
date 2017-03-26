@@ -6,6 +6,7 @@ class CommandModeException(CliException):
     pass
 
 
+
 class CommandMode(Node):
     """
     Class describes our prompt and implement enter and exit command functions
@@ -36,6 +37,7 @@ class CommandMode(Node):
             :param
             :param parent_mode: Connect parent mode
             """
+
         if not exit_error_map:
             exit_error_map = {}
         if not enter_error_map:
@@ -49,7 +51,7 @@ class CommandMode(Node):
 
         super(CommandMode, self).__init__()
         self.prompt = prompt
-        self.enter_command = enter_command
+        self._enter_command = enter_command
         self._exit_command = exit_command
         self._enter_action_map = enter_action_map
         self._exit_action_map = exit_action_map
@@ -58,9 +60,11 @@ class CommandMode(Node):
         self._enter_actions = enter_actions
         self.expect_map = expect_map
         self.commands = commands
+        self.root_mode = None
 
         if parent_mode:
             self.add_parent_mode(parent_mode)
+
 
     def add_parent_mode(self, mode):
         """
@@ -104,7 +108,20 @@ class CommandMode(Node):
         if self._enter_actions:
             self._enter_actions(cli_service)
 
+    @staticmethod
+    def set_child_mode(child_mode):
+        nested_set(CommandMode.RELATIONS_DICT,child_mode)
 
+    @staticmethod
+    def set_root_mode(mode):
+        CommandMode.RELATIONS_DICT.update({mode:{}})
+
+def nested_set(dic, value):
+    if dic.values()[0]:
+        dic.values()[0][dic.values()[0].keys()[-1]].update({value:{}})
+    else:
+        dic[dic.keys()[-1]] = {value: {}}
+    return dic
 
 
 

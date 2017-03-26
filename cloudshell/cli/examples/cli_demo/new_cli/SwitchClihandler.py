@@ -4,10 +4,13 @@ from cloudshell.cli.command_mode_helper import CommandModeHelper
 from cloudshell.networking.cli_handler_impl import CliHandlerImpl
 from cloudshell.shell.core.context_utils import get_attribute_by_name
 
+
 class EnableCommandMode(CommandMode):
-    PROMPT = r'(?:(?!\)).)#\s*$'
-    ENTER_COMMAND = 'enable'
-    EXIT_COMMAND = ''
+    prompt = r'(?:(?!\)).)#\s*$'
+    enter_command = 'enable'
+    exit_command = 'exit'
+
+    commands = ['terminal length 0', 'terminal width 300']
 
     def __init__(self, context):
         """
@@ -16,15 +19,20 @@ class EnableCommandMode(CommandMode):
         :param context:
         """
         self._context = context
+        enable_password = get_attribute_by_name(attribute_name='Enable Password',
+                                                context=context)
+        self.expect_map = {'[Pp]assword': lambda session, logger: session.send_line(enable_password, logger)}
 
-        CommandMode.__init__(self, EnableCommandMode.PROMPT, EnableCommandMode.ENTER_COMMAND,
-                             EnableCommandMode.EXIT_COMMAND)
+        CommandMode.__init__(self, prompt=EnableCommandMode.prompt, enter_command=EnableCommandMode.enter_command,
+                             exit_command=EnableCommandMode.exit_command, expect_map=self.expect_map,
+                             commands=EnableCommandMode.commands)
+
 
 class DefaultCommandMode(CommandMode):
-    PROMPT = r'>\s*$'
-    ENTER_COMMAND = ''
-    EXIT_COMMAND = ''
-
+    prompt = r'#'
+    enter_command = ''
+    exit_command = ''
+    commands = ['', '']
     def __init__(self, context):
         """
         Initialize Default command mode, only for cases when session started not in enable mode
@@ -32,14 +40,15 @@ class DefaultCommandMode(CommandMode):
         :param context:
         """
         self._context = context
-        CommandMode.__init__(self, DefaultCommandMode.PROMPT, DefaultCommandMode.ENTER_COMMAND,
-                             DefaultCommandMode.EXIT_COMMAND)
+        CommandMode.__init__(self, DefaultCommandMode.prompt, DefaultCommandMode.enter_command,
+                             DefaultCommandMode.exit_command)
 
 class ConfigCommandMode(CommandMode):
-    PROMPT = r'\(config.*\)#\s*$'
-    ENTER_COMMAND = 'configure terminal'
-    EXIT_COMMAND = 'exit'
-
+    prompt = r'\(config.*\)#\s*$'
+    enter_command = 'configure terminal'
+    exit_command = 'exit'
+    commands = ['', '']
+    expect_map = {}
     def __init__(self, context):
         """
         Initialize Config command mode
@@ -47,19 +56,13 @@ class ConfigCommandMode(CommandMode):
         :param context:
         """
         exit_action_map = {
-            self.PROMPT: lambda session, logger: session.send_line('exit', logger)}
-        CommandMode.__init__(self, ConfigCommandMode.PROMPT,
-                             ConfigCommandMode.ENTER_COMMAND,
-                             ConfigCommandMode.EXIT_COMMAND,
-                             exit_action_map=exit_action_map)
+            self.prompt: lambda session, logger: session.send_line('exit', logger)}
+        CommandMode.__init__(self, prompt=ConfigCommandMode.prompt,
+                             enter_command=ConfigCommandMode.enter_command,
+                             exit_command=ConfigCommandMode.exit_command,
+                             exit_action_map=exit_action_map,expect_map={},commands=[])
 
 
-CommandMode.RELATIONS_DICT = {
-    DefaultCommandMode: {
-        EnableCommandMode: {
-            ConfigCommandMode: {}
-        }
-    }}
 
 class SwitchCliHandler(CliHandlerImpl):
     def __init__(self, cli, context, logger):

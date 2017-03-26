@@ -61,6 +61,8 @@ class CliServiceImpl(CliService):
         """
         return CommandModeContextManager(self, command_mode, self._logger)
 
+
+
     def send_command(self, command, expected_string=None, action_map=None, error_map=None, logger=None, *args,
                      **kwargs):
         """
@@ -84,22 +86,39 @@ class CliServiceImpl(CliService):
         return self.session.hardware_expect(command, expected_string=expected_string, action_map=action_map,
                                             error_map=error_map, logger=logger, *args, **kwargs)
 
-    def on_session_start(self, modes_list,logger):
+    def on_session_start(self, context,logger):
         """Send default commands to configure/clear session outputs
         :return:
         """
-        for mode in modes_list:
-            self._enter_mode(mode=mode, logger=logger)
+        command_modes_list = list(CommandModeHelper.create_command_mode(context).keys())
+        for mode in command_modes_list:
+            self._enter_mode(mode=mode(context), logger=logger)
             for command in mode.commands:
                 self.session.hardware_expect(command, mode.prompt, logger)
+            exit_parent_mode = self.find_key(CommandMode.RELATIONS_DICT,mode)
+            self._exit_mode(mode,exit_parent_mode,logger)
 
     def _enter_mode(self, mode ,logger):
-
         self.session.hardware_expect(mode.enter_command, mode.prompt, action_map=mode.expect_map, logger=logger)
         result = self.session.hardware_expect('', '{0}'.format(mode.prompt),
                                          logger)
         if not re.search(mode.prompt, result):
             raise Exception('enter_mode', 'There was an error entering the mode')
+
+    def _exit_mode(self, mode,parent_mode,logger):
+        res = self.session.hardware_expect(mode.exit_command, expected_string=parent_mode.prompt, logger=logger)
+        print res
+
+    def find_key(self,dic, value):
+        tmp = dic
+        for k in tmp:
+            if tmp[k].keys()[0] == value:
+                break
+            else:
+                tmp = tmp[k]
+        return k
+
+
 
     def _change_mode(self, requested_command_mode):
         """
