@@ -8,7 +8,7 @@ from cloudshell.shell.core.context_utils import get_attribute_by_name
 class EnableCommandMode(CommandMode):
     prompt = r'(?:(?!\)).)#\s*$'
     enter_command = 'enable'
-    exit_command = 'exit'
+    exit_command = ''
 
     commands = ['terminal length 0', 'terminal width 300']
 
@@ -47,7 +47,7 @@ class ConfigCommandMode(CommandMode):
     prompt = r'\(config.*\)#\s*$'
     enter_command = 'configure terminal'
     exit_command = 'exit'
-    commands = ['', '']
+    commands = ['no logging console']
     expect_map = {}
     def __init__(self, context):
         """
@@ -71,8 +71,6 @@ class SwitchCliHandler(CliHandlerImpl):
         self.default_mode = modes[DefaultCommandMode]
         self.enable_mode = modes[EnableCommandMode]
         self.config_mode = modes[ConfigCommandMode]
-
-
 
     @property
     def username(self):

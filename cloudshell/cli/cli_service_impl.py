@@ -91,6 +91,7 @@ class CliServiceImpl(CliService):
         :return:
         """
         command_modes_list = list(CommandModeHelper.create_command_mode(context).keys())
+        command_modes_list.reverse()
         for mode in command_modes_list:
             self._enter_mode(mode=mode(context), logger=logger)
             for command in mode.commands:
@@ -107,7 +108,6 @@ class CliServiceImpl(CliService):
 
     def _exit_mode(self, mode,parent_mode,logger):
         res = self.session.hardware_expect(mode.exit_command, expected_string=parent_mode.prompt, logger=logger)
-        print res
 
     def find_key(self,dic, value):
         tmp = dic

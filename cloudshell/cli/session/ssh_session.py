@@ -74,6 +74,7 @@ class SSHSession(ExpectSession, ConnectionParams):
         self._current_channel.settimeout(self._timeout)
 
         self.hardware_expect(None, expected_string=prompt, timeout=self._timeout, logger=logger)
+        #TODO this line to be removed once the refactoring applied
         if self.on_session_start and callable(self.on_session_start):
             self.on_session_start(self, logger)
         self._active = True
